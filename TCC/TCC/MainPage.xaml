@@ -8,10 +8,12 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Ellipse x:Name="LED" Fill="LightGray" Stroke="White" Width="100" Height="100" Margin="10"/>
-            <TextBlock x:Name="DelayText" Text="500ms" Margin="10" TextAlignment="Center" FontSize="26.667" />
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,359,19,10">
             <TextBlock x:Name="GpioStatus" Text="Waiting to initialize GPIO..." Margin="10,50,10,10" TextAlignment="Center" FontSize="26.667" />
         </StackPanel>
+        <Ellipse x:Name="Port1" Fill="LightGray" Stroke="White" Margin="48,82,214,458" Width="100" Height="100"/>
+        <Ellipse x:Name="Port2" Fill="LightGray" Stroke="White" Margin="200,82,62,458" Width="100" Height="100"/>
+        <Ellipse x:Name="Port3" Fill="LightGray" Stroke="White" Margin="48,279,214,261" Width="100" Height="100"/>
+        <Ellipse x:Name="Port4" Fill="LightGray" Stroke="White" Margin="200,279,62,261" Width="100" Height="100"/>
     </Grid>
 </Page>

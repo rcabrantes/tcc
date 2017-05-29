@@ -1,0 +1,38 @@
+﻿@model List<bool>
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+
+
+<div class="row">
+    @for (int i = 0; i < 4; i++)
+    {
+        <div>
+            <input class="port-toggle-button" type="button" value="Porta @i" data-port-id="@i" style="color:@(Model[i]?"red":"gray")" />
+        </div>
+    }
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.port-toggle-button').click(function () { portToggle($(this).attr('data-port-id')); })
+        });
+
+        function portToggle(id) {
+            var data = {
+                type: 'POST',
+                url: '@Url.Action("TogglePort", "Home")',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ portNum: id }),
+                success: function (newState) {
+                    $(".port-toggle-button[data-port-id='" + id + "']").css('color', newState ? 'red' : 'gray');
+                },
+            };
+            $.ajax(data);
+        }
+
+    </script>
+}
