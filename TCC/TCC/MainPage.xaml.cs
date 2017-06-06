@@ -36,9 +36,10 @@ namespace TCC
         private SolidColorBrush redBrush = new SolidColorBrush(Windows.UI.Colors.Red);
         private SolidColorBrush grayBrush = new SolidColorBrush(Windows.UI.Colors.LightGray);
 
-        private List<Ellipse> Leds;
-        private List<int> portNums;
-        private List<GpioPin> ports;
+        private List<Ellipse> Leds = new List<Ellipse>(); // initializing the list
+        private List<int> portNums = new List<int>();  // initializing the list
+        private List<GpioPin> ports = new List<GpioPin>(); // initializing the list
+
 
         public MainPage()
         {
@@ -51,11 +52,12 @@ namespace TCC
             Leds.Add(Port4);
 
             portNums = new List<int>();
-            portNums.Add(1);
-            portNums.Add(2);
-            portNums.Add(3);
-            portNums.Add(5);
+            portNums.Add(5); //gpio 5
+            portNums.Add(6); //gpio 6
+            portNums.Add(13); //gpio 13
+            portNums.Add(19); //gpio 19
 
+            InitGPIO(); //initializing the GPIO
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -85,7 +87,7 @@ namespace TCC
                         Leds[i].Fill = redBrush;
                         if (GPIOLoaded)
                         {
-                            ports[i].Write(GpioPinValue.High);
+                            ports[i].Write(GpioPinValue.Low); //low state deactivate the relays
                         }
                     }
                     else
@@ -93,7 +95,7 @@ namespace TCC
                         Leds[i].Fill = grayBrush;
                         if (GPIOLoaded)
                         {
-                            ports[i].Write(GpioPinValue.Low);
+                            ports[i].Write(GpioPinValue.High); //high state activate the relays
                         }
 
                     }
@@ -126,13 +128,13 @@ namespace TCC
             {
                 var port = gpio.OpenPin(portNum);
                 ports.Add(port);
-                port.Write(GpioPinValue.Low);
+                port.Write(GpioPinValue.High); //high state, deactivated relays
                 port.SetDriveMode(GpioPinDriveMode.Output);
                 GPIOLoaded = true;
 
             }
 
-            GpioStatus.Text = "GPIO pin initialized correctly.";
+            GpioStatus.Text = "GPIO pins initialized correctly.";
 
         }
 
@@ -142,3 +144,4 @@ namespace TCC
         }
     }
 }
+
