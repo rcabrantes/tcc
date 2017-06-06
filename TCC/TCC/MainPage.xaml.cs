@@ -70,7 +70,7 @@ namespace TCC
 
         private async void Timer_Tick(object sender, object e)
         {
-            var response = await client.GetAsync("http://localhost:52945/home/getGPIOPortStatus");
+            var response = await client.GetAsync("http://rsinohara.com/home/getGPIOPortStatus");
 
             if (response.IsSuccessStatusCode)
             {
