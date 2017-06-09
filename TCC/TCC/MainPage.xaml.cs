@@ -27,17 +27,26 @@ namespace TCC
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        //HttpClient, estático para nao recriar um toda hora.
         private static readonly HttpClient client = new HttpClient();
 
-
+        //Indica se a GPIO já foi inicializada
         private bool GPIOLoaded = false;
 
+        //Timer que vai verificar o estado das portas periodicamente
         private DispatcherTimer timer;
+
+        //Armazenando as cores para simplificar o código
         private SolidColorBrush redBrush = new SolidColorBrush(Windows.UI.Colors.Red);
         private SolidColorBrush grayBrush = new SolidColorBrush(Windows.UI.Colors.LightGray);
 
+        //Lista dos elementos que representam as portas
         private List<Ellipse> Leds = new List<Ellipse>(); // initializing the list
+
+        //Lista com o numero fisico das portas GPIO
         private List<int> portNums = new List<int>();  // initializing the list
+
+        //Objetos criados pela funcao que inicializa a GPIO
         private List<GpioPin> ports = new List<GpioPin>(); // initializing the list
 
 
@@ -45,12 +54,14 @@ namespace TCC
         {
             this.InitializeComponent();
 
+            //Carrega a lista de circulos com os objetos no formulario
             Leds = new List<Ellipse>();
             Leds.Add(Port1);
             Leds.Add(Port2);
             Leds.Add(Port3);
             Leds.Add(Port4);
 
+            //Carrega a lista de numeros com os numeros fisicos das portas
             portNums = new List<int>();
             portNums.Add(5); //gpio 5
             portNums.Add(6); //gpio 6
@@ -59,6 +70,7 @@ namespace TCC
 
             InitGPIO(); //initializing the GPIO
 
+            //Configura o timer pare ler o valor das portas
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += Timer_Tick;
@@ -72,48 +84,62 @@ namespace TCC
 
         private async void Timer_Tick(object sender, object e)
         {
-            var response = await client.GetAsync("http://rsinohara.com/home/getGPIOPortStatus");
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var result = await response.Content.ReadAsStringAsync();
-                var data = JArray.Parse(result);
+                //Le os valores no servidor
+                var response = await client.GetAsync("http://rsinohara.com/home/getGPIOPortStatus");
 
-                int i = 0;
-                foreach (var port in data)
+                //Se sucesso
+                if (response.IsSuccessStatusCode)
                 {
-                    if (bool.Parse(port.ToString()))
+                    //Ler os valores da resposta
+                    var result = await response.Content.ReadAsStringAsync();
+
+                    //Ler os valores JSON e colocar num array
+                    var data = JArray.Parse(result);
+
+                    //Para cada valor lido
+                    int i = 0;
+                    foreach (var port in data)
                     {
-                        Leds[i].Fill = redBrush;
-                        if (GPIOLoaded)
+                        //Se for verdadeiro, colocar o estado da porta associada em LOW
+                        if (bool.Parse(port.ToString()))
                         {
-                            ports[i].Write(GpioPinValue.Low); //low state deactivate the relays
-                        }
-                    }
-                    else
-                    {
-                        Leds[i].Fill = grayBrush;
-                        if (GPIOLoaded)
-                        {
-                            ports[i].Write(GpioPinValue.High); //high state activate the relays
+                            //Mudar a cor do circulo
+                            Leds[i].Fill = redBrush;
+                            if (GPIOLoaded)
+                            {
+                                ports[i].Write(GpioPinValue.Low); //low state deactivate the relays
+                            }
                         }
 
+                        //Se falso, colocar a porta em HIGH
+                        else
+                        {
+                            Leds[i].Fill = grayBrush;
+                            if (GPIOLoaded)
+                            {
+                                ports[i].Write(GpioPinValue.High); //high state activate the relays
+                            }
+
+                        }
+                        i++;
                     }
-                    i++;
+
                 }
+                else
+                {
+                    GpioStatus.Text = "Connection to server failed.";
 
+                }
             }
-            else
-            {
-                GpioStatus.Text = "Connection to server failed.";
-
-            }
-
+            catch { }
         }
 
 
         private void InitGPIO()
         {
+            //Cria controlador GPIO
             var gpio = GpioController.GetDefault();
 
 
@@ -124,6 +150,7 @@ namespace TCC
                 return;
             }
 
+            //Inicializar cada porta com o objeto que controla a porta. também inicializa com desligado
             foreach (var portNum in portNums)
             {
                 var port = gpio.OpenPin(portNum);
